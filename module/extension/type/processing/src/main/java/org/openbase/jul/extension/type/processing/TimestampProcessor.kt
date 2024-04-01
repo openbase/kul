@@ -1,10 +1,7 @@
 package org.openbase.jul.extension.type.processing
 
 import com.google.protobuf.MessageOrBuilder
-import org.openbase.jul.exception.CouldNotPerformException
-import org.openbase.jul.exception.NotAvailableException
-import org.openbase.jul.exception.NotSupportedException
-import org.openbase.jul.exception.VerificationFailedException
+import org.openbase.jul.exception.*
 import org.openbase.jul.exception.printer.ExceptionPrinter
 import org.openbase.jul.extension.protobuf.processing.ProtoBufFieldProcessor
 import org.openbase.type.timing.TimestampType
@@ -21,9 +18,11 @@ import java.util.concurrent.TimeUnit
 object TimestampProcessor {
     const val SET: String = "set"
     const val TIMESTAMP_NAME: String = "Timestamp"
+    const val TIME_NAME: String = "Time"
 
     @JvmField
-    val TIMESTAMP_FIELD_NAME: String = TIMESTAMP_NAME.lowercase(Locale.getDefault())
+    val TIMESTAMP_FIELD_NAME: String = TIMESTAMP_NAME.lowercase()
+    val TIME_FIELD_NAME: String = TIME_NAME.lowercase()
 
     @JvmStatic
     val currentTimestamp: TimestampType.Timestamp
@@ -302,5 +301,7 @@ object TimestampProcessor {
     }
 }
 
-val <M : TimestampOrBuilder> M.instant: Instant
-    get() = Instant.ofEpochMilli(TimestampProcessor.getTimestamp(this, TimeUnit.MILLISECONDS))
+val <M : TimestampOrBuilder> M.instant: Instant?
+    get() = tryOrNull {
+        Instant.ofEpochMilli(TimestampProcessor.getTimestamp(this, TimeUnit.MILLISECONDS))
+    }
