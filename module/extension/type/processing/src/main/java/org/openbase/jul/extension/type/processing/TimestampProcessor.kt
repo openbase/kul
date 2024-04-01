@@ -18,11 +18,9 @@ import java.util.concurrent.TimeUnit
 object TimestampProcessor {
     const val SET: String = "set"
     const val TIMESTAMP_NAME: String = "Timestamp"
-    const val TIME_NAME: String = "Time"
 
     @JvmField
     val TIMESTAMP_FIELD_NAME: String = TIMESTAMP_NAME.lowercase()
-    val TIME_FIELD_NAME: String = TIME_NAME.lowercase()
 
     @JvmStatic
     val currentTimestamp: TimestampType.Timestamp
@@ -303,5 +301,5 @@ object TimestampProcessor {
 
 val <M : TimestampOrBuilder> M.instant: Instant?
     get() = tryOrNull {
-        Instant.ofEpochMilli(TimestampProcessor.getTimestamp(this, TimeUnit.MILLISECONDS))
+        Instant.ofEpochMilli(time.div(1000))
     }
