@@ -67,6 +67,31 @@ abstract class AbstractResourcePanel<R : NameProvider, PRP : ResourcePanel>: Res
     private val CHILDREN_MONITOR = Any()
     var objectType: ObjectType
 
+    constructor(
+        resource: R,
+        placementPolygon: Polygon?,
+        objectType: ObjectType,
+        parentResourcePanel: PRP?,
+        drawLayer: DrawLayer? = null,
+        parentPanel: ResourceDisplayPanel<out ResourcePanel>,
+        linkAsChild: Boolean = false,
+    ) {
+        this.resource = resource
+        this.objectType = objectType
+        this.state = VisibleResourcePanelState.Unselected
+        this.mouseState = VisibleResourcePanelMouseState.Untouched
+        this.parentResourcePanel = parentResourcePanel?: this as PRP
+        this.parentPanel = parentPanel
+        this.placementPolygon = placementPolygon
+        this.boundingBox = placementPolygon!!.bounds2D
+        this.transformedBoundingBox = Rectangle2D.Double()
+        this.jComponents = ArrayList()
+        this.childrens = LinkedList()
+        if(linkAsChild) {
+            this.parentResourcePanel.addChild(this, drawLayer!!)
+        }
+    }
+
     constructor(resource: R, placementPolygon: Polygon, imageURI: String?, parentPanel: ResourceDisplayPanel<out ResourcePanel>) : this(
         resource,
         placementPolygon,
@@ -99,19 +124,17 @@ abstract class AbstractResourcePanel<R : NameProvider, PRP : ResourcePanel>: Res
         parentPanel
     )
 
-    constructor(resource: R, placementPolygon: Polygon, objectType: ObjectType, parentPanel: ResourceDisplayPanel<out ResourcePanel>) {
-        this.resource = resource
-        this.objectType = objectType
-        this.state = VisibleResourcePanelState.Unselected
-        this.mouseState = VisibleResourcePanelMouseState.Untouched
-        this.parentResourcePanel = this as PRP
-        this.parentPanel = parentPanel
-        this.placementPolygon = placementPolygon
-        this.boundingBox = placementPolygon.bounds2D
-        this.transformedBoundingBox = Rectangle2D.Double()
-        this.jComponents = ArrayList()
-        this.childrens = LinkedList()
-    }
+    constructor(resource: R,
+                placementPolygon: Polygon,
+                objectType: ObjectType,
+                parentPanel: ResourceDisplayPanel<out ResourcePanel>
+    ) : this (
+        resource = resource,
+        placementPolygon = placementPolygon,
+        objectType = objectType,
+        parentResourcePanel = null,
+        parentPanel = parentPanel,
+    )
 
     constructor(
         resource: R,
@@ -151,22 +174,16 @@ abstract class AbstractResourcePanel<R : NameProvider, PRP : ResourcePanel>: Res
         placementPolygon: Polygon?,
         objectType: ObjectType,
         parentResourcePanel: PRP,
-        drawLayer: DrawLayer?
-    ) {
-        this.resource = resource
-        this.objectType = objectType
-        this.state = VisibleResourcePanelState.Unselected
-        this.mouseState = VisibleResourcePanelMouseState.Untouched
-        this.parentResourcePanel = parentResourcePanel
-        this.parentPanel = parentResourcePanel.parentPanel
-        this.placementPolygon = placementPolygon
-        this.boundingBox = placementPolygon!!.bounds2D
-        this.transformedBoundingBox = Rectangle2D.Double()
-        this.jComponents = ArrayList()
-        this.childrens = LinkedList()
-        this.parentResourcePanel.addChild(this, drawLayer!!)
-        assert(placementPolygon != null)
-    }
+        drawLayer: DrawLayer?,
+    ) : this (
+        resource = resource,
+        placementPolygon = placementPolygon,
+        objectType = objectType,
+        parentResourcePanel = parentResourcePanel,
+        parentPanel = parentResourcePanel.parentPanel,
+        drawLayer = drawLayer,
+        linkAsChild = true,
+    )
 
     override fun getName(): String {
         return resource.name
